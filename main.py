@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Union
+from typing import Union, Annotated
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 from models import Item
 
@@ -44,9 +44,9 @@ async def get_model(model_name: ModelName):
 
 
 # Query Parameters
-@app.get("/items/")
-async def read_item(skip: int = 0, limit: int = 10):
-    return fake_items_db[skip: skip+limit]
+# @app.get("/items/")
+# async def read_item(skip: int = 0, limit: int = 10):
+#     return fake_items_db[skip: skip+limit]
 
 
 # async def read_item(item_id: str, q: str | None = None):   available in 3.10+
@@ -64,7 +64,7 @@ async def read_item(item_id: str, q: Union[str, None] = None, short: bool = Fals
 
 @app.get("/users/{user_id}/items/{item_id}")
 async def read_user_item(
-    user_id: int, item_id: str, q: Union[str, None] = None, short: bool = False
+        user_id: int, item_id: str, q: Union[str, None] = None, short: bool = False
 ):
     item = {"item_id": item_id, "owner_id": user_id}
     if q:
@@ -92,3 +92,20 @@ async def update_item(item_id: int, item: Item, q: Union[str, None] = None):
     if q:
         result.update({"q": q})
     return result
+
+
+# Query Parameters and String Validations
+@app.get("/items/")
+# async def read_items(q: Annotated[Union[str, None], Query(min_length=3, max_length=50, pattern="^fixedquery$")] = None):
+async def read_items(
+        q: Annotated[str, Query(
+            title="Query string",
+            description="Query string for the items to search in the database that"
+                        " have a good match",
+            min_length=3,
+            max_length=50
+        )] = ...):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results

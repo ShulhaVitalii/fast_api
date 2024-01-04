@@ -3,6 +3,8 @@ from typing import Union
 
 from fastapi import FastAPI
 
+from models import Item
+
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
@@ -41,6 +43,7 @@ async def get_model(model_name: ModelName):
     return {"model_name": model_name, "message": "Have some residuals"}
 
 
+# Query Parameters
 @app.get("/items/")
 async def read_item(skip: int = 0, limit: int = 10):
     return fake_items_db[skip: skip+limit]
@@ -71,3 +74,21 @@ async def read_user_item(
             {"description": "This is an amazing item that has a long description"}
         )
     return item
+
+
+# Request Body
+@app.post("/items/")
+async def create_item(item: Item):
+    item_dict = item.model_dump()
+    if item.tax:
+        price_with_tax = item.price + item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+    return item_dict
+
+
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item, q: Union[str, None] = None):
+    result = {"item_id": item_id, **item.model_dump()}
+    if q:
+        result.update({"q": q})
+    return result

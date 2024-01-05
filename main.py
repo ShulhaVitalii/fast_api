@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Union, Annotated
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 
 from models import Item
 
@@ -106,6 +106,22 @@ async def read_items(
             max_length=50
         )] = ...):
     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+# Path Parameters and Numeric Validations
+# gt: greater than
+# ge: greater than or equal
+# lt: less than
+# le: less than or equal
+@app.get("/item/{item_id}")
+async def read_items(
+    item_id: Annotated[int, Path(title="The ID of the item to get", ge=1, le=100)],
+    q: Annotated[Union[str, None], Query(alias="item-query")] = None,
+):
+    results = {"item_id": item_id}
     if q:
         results.update({"q": q})
     return results

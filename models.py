@@ -18,6 +18,26 @@ class Item(BaseModel):
     tags: set[str] = set()
     images: Union[list[Image], None] = None
 
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "name": "Foo",
+                    "description": "A very nice Item",
+                    "price": 35.4,
+                    "tax": 3.2,
+                    "tags": ["first_tag", "second_tag"],
+                    "images": [
+                        {
+                            "url": "https://example.com/",
+                            "name": "img_name"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
 
 class Offer(BaseModel):
     name: str

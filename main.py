@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Union, Annotated
 from uuid import UUID
 
-from fastapi import FastAPI, Query, Path, Body
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header
 
 from models import Item, User, Offer, Image
 
@@ -230,4 +230,14 @@ async def read_items(
         "duration": duration,
     }
 
-#
+
+# Cookie Parameters
+@app.get("/items/cookie/")
+async def read_items(ads_id: Annotated[Union[str, None], Cookie()] = None):
+    return {"ads_id": ads_id}
+
+
+# Header Parameters
+@app.get("/items/headers/")
+async def read_items(user_agent: Annotated[Union[str, None], Header()] = None):
+    return {"User-Agent": user_agent}

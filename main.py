@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Union, Annotated
 
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 
-from models import Item
+from models import Item, User, Offer, Image
 
 
 class ModelName(str, Enum):
@@ -86,12 +86,12 @@ async def create_item(item: Item):
     return item_dict
 
 
-@app.put("/items/{item_id}")
-async def update_item(item_id: int, item: Item, q: Union[str, None] = None):
-    result = {"item_id": item_id, **item.model_dump()}
-    if q:
-        result.update({"q": q})
-    return result
+# @app.put("/items/{item_id}")
+# async def update_item(item_id: int, item: Item, q: Union[str, None] = None):
+#     result = {"item_id": item_id, **item.model_dump()}
+#     if q:
+#         result.update({"q": q})
+#     return result
 
 
 # Query Parameters and String Validations
@@ -125,3 +125,42 @@ async def read_items(
     if q:
         results.update({"q": q})
     return results
+
+
+# Body - Multiple Parameters
+@app.put("/itemss/{item_id}")
+async def update_item(
+    *,
+    item_id: int,
+    item: Item,
+    user: User,
+    importance: Annotated[int, Body(gt=0)],
+    q: Union[str, None] = None,
+):
+    results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+# Body - Fields
+# Body - Nested Models
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item):
+    results = {"item_id": item_id, "item": item}
+    return results
+
+
+@app.post("/offers/")
+async def create_offer(offer: Offer):
+    return offer
+
+
+@app.post("/images/multiple/")
+async def create_multiple_images(images: list[Image]):
+    return images
+
+
+@app.post("/index-weights/")
+async def create_index_weights(weights: dict[int, float]):
+    return weights
